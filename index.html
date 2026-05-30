@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Animated ToDo Dashboard</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#000,#1a1a1a,#111);
+min-height:100vh;
+padding:40px 20px;
+overflow-x:hidden;
+color:white;
+}
+
+/* Animated Background */
+
+body::before{
+content:"";
+position:fixed;
+width:350px;
+height:350px;
+background:red;
+border-radius:50%;
+filter:blur(120px);
+top:-100px;
+left:-100px;
+opacity:.4;
+animation:move1 8s infinite alternate;
+z-index:-1;
+}
+
+body::after{
+content:"";
+position:fixed;
+width:350px;
+height:350px;
+background:yellow;
+border-radius:50%;
+filter:blur(120px);
+bottom:-100px;
+right:-100px;
+opacity:.3;
+animation:move2 8s infinite alternate;
+z-index:-1;
+}
+
+@keyframes move1{
+from{transform:translate(0,0);}
+to{transform:translate(150px,100px);}
+}
+
+@keyframes move2{
+from{transform:translate(0,0);}
+to{transform:translate(-150px,-100px);}
+}
+
+/* Main Card */
+
+.container{
+max-width:850px;
+margin:auto;
+
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(15px);
+
+border:1px solid rgba(255,255,255,.1);
+
+border-radius:25px;
+
+padding:35px;
+
+box-shadow:
+0 15px 35px rgba(0,0,0,.6);
+
+animation:floatCard 4s ease-in-out infinite;
+}
+
+@keyframes floatCard{
+0%,100%{
+transform:translateY(0);
+}
+50%{
+transform:translateY(-10px);
+}
+}
+
+/* Title */
+
+h1{
+text-align:center;
+margin-bottom:25px;
+font-size:40px;
+color:yellow;
+
+text-shadow:
+0 0 15px yellow,
+0 0 30px red;
+}
+
+/* Input Area */
+
+.input-box{
+display:flex;
+gap:15px;
+margin-bottom:25px;
+flex-wrap:wrap;
+}
+
+input{
+flex:1;
+padding:15px;
+border:none;
+outline:none;
+border-radius:12px;
+font-size:16px;
+}
+
+/* Buttons */
+
+button{
+padding:14px 22px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:bold;
+transition:.4s;
+margin:5px;
+}
+
+button:hover{
+transform:translateY(-5px) scale(1.05);
+}
+
+/* Add Button */
+
+.add-btn{
+background:red;
+color:white;
+
+box-shadow:
+0 0 15px red;
+}
+
+/* Filter Buttons */
+
+.filters{
+display:flex;
+justify-content:center;
+gap:15px;   /* distance between buttons */
+margin:20px 0 30px;
+flex-wrap:wrap;
+}
+
+.filter-btn{
+background:yellow;
+color:black;
+
+box-shadow:
+0 0 15px yellow;
+}
+
+/* Task List */
+
+ul{
+list-style:none;
+}
+
+li{
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:rgba(255,255,255,.08);
+
+padding:15px;
+margin-bottom:15px;
+
+border-radius:15px;
+
+transition:.4s;
+}
+
+li:hover{
+transform:translateX(10px);
+
+box-shadow:
+0 0 15px yellow,
+0 0 30px red;
+}
+
+.completed{
+text-decoration:line-through;
+opacity:.6;
+}
+
+/* Action Buttons */
+
+.action-buttons{
+display:flex;
+gap:10px;
+}
+
+.complete-btn{
+background:yellow;
+color:black;
+}
+
+.edit-btn{
+background:orange;
+color:black;
+}
+
+.delete-btn{
+background:red;
+color:white;
+}
+
+.footer{
+text-align:center;
+margin-top:20px;
+color:#ccc;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🚀 To-Do List Application</h1>
+
+<div class="input-box">
+
+<input
+type="text"
+id="taskInput"
+placeholder="Enter Task">
+
+<button
+class="add-btn"
+onclick="addTask()">
+
+➕ Add Task
+
+</button>
+
+</div>
+
+<div class="filters">
+
+<button
+class="filter-btn"
+onclick="filterTasks('all')">
+
+All
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterTasks('active')">
+
+Active
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterTasks('completed')">
+
+Completed
+
+</button>
+
+</div>
+
+<ul id="taskList"></ul>
+
+<div class="footer">
+JavaScript Logic & State Management
+</div>
+
+</div>
+
+<script>
+
+let tasks =
+JSON.parse(
+localStorage.getItem("tasks")
+) || [];
+
+let currentFilter="all";
+
+function saveTasks(){
+localStorage.setItem(
+"tasks",
+JSON.stringify(tasks)
+);
+}
+
+function addTask(){
+
+const input=
+document.getElementById("taskInput");
+
+const text=
+input.value.trim();
+
+if(text==="") return;
+
+tasks.push({
+text:text,
+completed:false
+});
+
+saveTasks();
+
+input.value="";
+
+renderTasks();
+}
+
+function renderTasks(){
+
+const taskList=
+document.getElementById("taskList");
+
+taskList.innerHTML="";
+
+let filtered=tasks;
+
+if(currentFilter==="active"){
+filtered=
+tasks.filter(
+t=>!t.completed
+);
+}
+
+if(currentFilter==="completed"){
+filtered=
+tasks.filter(
+t=>t.completed
+);
+}
+
+filtered.forEach((task,index)=>{
+
+const li=
+document.createElement("li");
+
+if(task.completed){
+li.classList.add("completed");
+}
+
+li.innerHTML=`
+
+<span>${task.text}</span>
+
+<div class="action-buttons">
+
+<button
+class="complete-btn"
+onclick="toggleTask(${index})">
+
+✓
+
+</button>
+
+<button
+class="edit-btn"
+onclick="editTask(${index})">
+
+Edit
+
+</button>
+
+<button
+class="delete-btn"
+onclick="deleteTask(${index})">
+
+Delete
+
+</button>
+
+</div>
+
+`;
+
+taskList.appendChild(li);
+
+});
+
+}
+
+function toggleTask(index){
+
+tasks[index].completed=
+!tasks[index].completed;
+
+saveTasks();
+
+renderTasks();
+}
+
+function editTask(index){
+
+const updated=
+prompt(
+"Edit Task",
+tasks[index].text
+);
+
+if(updated){
+
+tasks[index].text=
+updated;
+
+saveTasks();
+
+renderTasks();
+
+}
+
+}
+
+function deleteTask(index){
+
+tasks.splice(index,1);
+
+saveTasks();
+
+renderTasks();
+
+}
+
+function filterTasks(type){
+
+currentFilter=type;
+
+renderTasks();
+
+}
+
+renderTasks();
+
+</script>
+
+</body>
+</html>
